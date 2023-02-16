@@ -2,6 +2,7 @@
 import puppeteer from "puppeteer";
 
 const browser = await puppeteer.launch({
+  executablePath: "chromium-browser",
   headless: false,
   args: ["--start-fullscreen", "--no-default-browser-check"],
   ignoreDefaultArgs: ["--enable-automation"],
