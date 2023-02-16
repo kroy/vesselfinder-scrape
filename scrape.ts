@@ -15,17 +15,17 @@ await page.goto("https://www.vesselfinder.com", { timeout: 0 });
 // Set screen size
 // figure out/parameterize dimensions for the rpi
 await page.setViewport({ width: 2000, height: 2000 });
-const elsToHide = [
-  await page.waitForSelector("#map-buttons"),
-  await page.waitForSelector(".lsb"),
-  await page.waitForSelector("#last-searches"),
-].filter((el) => !!el);
-for (const el of elsToHide) {
-  await el?.evaluate((node) => node.remove());
-}
+// const elsToHide = [
+//   await page.waitForSelector("#map-buttons"),
+//   await page.waitForSelector(".lsb"),
+//   await page.waitForSelector("#last-searches"),
+// ].filter((el) => !!el);
+// for (const el of elsToHide) {
+//   await el?.evaluate((node) => node.remove());
+// }
 // page.click("#map", { button: "right" });
 
-const map = await page.waitForSelector("#map");
+const map = await page.waitForSelector("#map", { timeout: 0 });
 if (map) {
   await map.evaluate((node) => node.requestFullscreen());
 }
