@@ -10,7 +10,7 @@ const browser = await puppeteer.launch({
 const page = await browser.newPage();
 
 // we don't really want to wait for ads etc to be loaded
-await page.goto("https://www.vesselfinder.com");
+await page.goto("https://www.vesselfinder.com", { timeout: 0 });
 
 // Set screen size
 // figure out/parameterize dimensions for the rpi
