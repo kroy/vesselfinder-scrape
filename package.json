@@ -7,6 +7,9 @@
   "license": "MIT",
   "private": true,
   "packageManager": "yarn@3.4.1",
+  "scripts": {
+    "scrape": "yarn ts-node-esm scrape.ts"
+  },
   "dependencies": {
     "puppeteer": "^19.7.0"
   },
