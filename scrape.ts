@@ -20,7 +20,7 @@ const elsToHide = [
   await page.waitForSelector("#last-searches"),
 ].filter((el) => !!el);
 for (const el of elsToHide) {
-  await el.evaluate((node) => node.remove());
+  await el?.evaluate((node) => node.remove());
 }
 // page.click("#map", { button: "right" });
 
