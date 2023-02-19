@@ -11,6 +11,7 @@
     "scrape": "yarn ts-node-esm scrape.ts"
   },
   "dependencies": {
+    "dotenv": "^16.0.3",
     "puppeteer": "^19.7.0"
   },
   "devDependencies": {
