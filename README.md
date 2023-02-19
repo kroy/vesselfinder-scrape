@@ -25,11 +25,13 @@ yarn
 ```.env
 USERNAME=
 PASSWORD=
+SCREEN_WIDTH=1920
+SCREEN_WIDTH=1080
 # set RPI to true if you're running on the RPI, blank or false otherwise.
-RPI=
+RPI=false
 ```
 
-5. run the script
+6. run the script
 
 ```console
 yarn scrape

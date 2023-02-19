@@ -22,7 +22,7 @@ const login = async (page: Page) => {
     await Promise.all([
       handle.click(),
       // wait for network idle isn't great. We don't know what's going on in the background
-      page.waitForNavigation({ waitUntil: "networkidle0" }),
+      page.waitForNavigation({ waitUntil: "networkidle2" }),
     ]);
   }
 };
@@ -95,7 +95,12 @@ await page.goto("https://www.vesselfinder.com", { timeout: 0 });
 
 // Set screen size
 // figure out/parameterize dimensions for the rpi
-await page.setViewport({ width: 1920, height: 1080 });
+const width = Number(process.env.SCREEN_WIDTH ?? 1920);
+const height = Number(process.env.SCREEN_HEIGHT ?? 1080);
+await page.setViewport({
+  width,
+  height,
+});
 
 await selectFilters(page);
 await openSavedView(page);
