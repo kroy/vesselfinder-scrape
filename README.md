@@ -20,6 +20,15 @@ cd path/to/the/directory/you/cloned/into
 yarn
 ```
 
+5. Create a file called `.env` in the same directory as your project with the following values filled in:
+
+```.env
+USERNAME=
+PASSWORD=
+# set RPI to true if you're running on the RPI, blank or false otherwise.
+RPI=
+```
+
 5. run the script
 
 ```console
