@@ -2,6 +2,14 @@
 
 Use puppeteer to connect to vesselfinder.com and focus on the map element
 
+## TODO
+
+- [ ] Add refreshing on a cycle
+- [ ] Speed up loading time
+  - [ ] Try using playwright instead
+  - [ ] block ads
+- [ ] test out reliability over long runs
+
 ## Setup
 
 1. Install node 19 and npm: https://nodejs.org/en/download/current/
