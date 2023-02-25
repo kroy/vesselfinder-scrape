@@ -6,7 +6,7 @@ const setup = () => {
   dotenv.config();
 };
 
-const DEFAULT_TIMEOUT = { ...(process.env.RPI === "true" && { timeout: 0 }) };
+const DEFAULT_TIMEOUT = { timeout: 0 };
 const login = async (page: Page) => {
   // assume the login button is the first button in the login div
   await page.waitForSelector(".must-login button", {
@@ -117,18 +117,22 @@ const page = await browser.newPage();
 //   console.log(request.url());
 // });
 
-// we don't really want to wait for ads etc to be loaded
-await page.goto("https://www.vesselfinder.com", { ...DEFAULT_TIMEOUT });
-
 // Set screen size
 // figure out/parameterize dimensions for the rpi
+console.log("setting viewPort");
 const width = Number(process.env.SCREEN_WIDTH ?? 1920);
 const height = Number(process.env.SCREEN_HEIGHT ?? 1080);
 await page.setViewport({
   width,
   height,
+  isLandscape: true,
+  deviceScaleFactor: 2,
 });
+console.log("navigating to page");
+// we don't really want to wait for ads etc to be loaded
+await page.goto("https://www.vesselfinder.com", DEFAULT_TIMEOUT);
 
+console.log("selecting filters");
 await selectFilters(page);
 await openSavedView(page);
 // await hideUnwantedEls(page, ["#last-searches"]);
