@@ -24,11 +24,17 @@ const login = async (page: Page) => {
 
   const logInButtons = await page.$x("//button[contains(text(), 'Log In')]");
   if (logInButtons.length > 0) {
+    console.log("logging in");
     const handle = logInButtons[0];
     await Promise.all([
       handle.click(),
       // wait for network idle isn't great. We don't know what's going on in the background
-      page.waitForNavigation({ waitUntil: "networkidle2", ...DEFAULT_TIMEOUT }),
+      page
+        .waitForNavigation({ waitUntil: "networkidle0", ...DEFAULT_TIMEOUT })
+        .then((v) => {
+          console.log("network idle");
+          return v;
+        }),
     ]);
   }
 };
@@ -38,11 +44,14 @@ const openSavedView = async (page: Page) => {
     await page.click("a.tb-icon[title=Views]");
     if (await page.$(".must-login")) {
       await login(page);
+      console.log("logged in");
       const viewsButton = await page.waitForSelector("a.tb-icon[title=Views]", {
         ...DEFAULT_TIMEOUT,
       });
+      console.log("found views button");
       if (viewsButton) {
         await viewsButton.click();
+        console.log("clicked button");
       }
     }
 
@@ -102,6 +111,10 @@ const browser = await puppeteer.launch({
 });
 const page = await browser.newPage();
 
+// page.on("request", (request) => {
+//   console.log(request.url());
+// });
+
 // we don't really want to wait for ads etc to be loaded
 await page.goto("https://www.vesselfinder.com", { ...DEFAULT_TIMEOUT });
 
@@ -116,7 +129,7 @@ await page.setViewport({
 
 await selectFilters(page);
 await openSavedView(page);
-await hideUnwantedEls(page, ["#last-searches"]);
+// await hideUnwantedEls(page, ["#last-searches"]);
 const map = await page.waitForSelector("#map", {
   ...DEFAULT_TIMEOUT,
 });
@@ -128,8 +141,13 @@ const refreshBtn = await page.waitForSelector("#refresh-btn", {
   ...DEFAULT_TIMEOUT,
 });
 
-if (refreshBtn) {
-  await refreshBtn.click();
+while (true) {
+  console.log("waiting to refresh...");
+  await new Promise<void>((res) => setTimeout(() => res(), 60000));
+  if (refreshBtn) {
+    console.log("refreshing...");
+    await refreshBtn.click();
+  }
 }
 
 // await map.screenshot({ path: "map.png", fullPage: false });
