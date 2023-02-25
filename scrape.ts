@@ -116,18 +116,18 @@ const page = await browser.newPage();
 // page.on("request", (request) => {
 //   console.log(request.url());
 // });
-const width = Number(process.env.SCREEN_WIDTH ?? 1920);
-const height = Number(process.env.SCREEN_HEIGHT ?? 1080);
-await page.setViewport({
-  width,
-  height,
-});
 
 // we don't really want to wait for ads etc to be loaded
 await page.goto("https://www.vesselfinder.com", { ...DEFAULT_TIMEOUT });
 
 // Set screen size
 // figure out/parameterize dimensions for the rpi
+const width = Number(process.env.SCREEN_WIDTH ?? 1920);
+const height = Number(process.env.SCREEN_HEIGHT ?? 1080);
+await page.setViewport({
+  width,
+  height,
+});
 
 await selectFilters(page);
 await openSavedView(page);
