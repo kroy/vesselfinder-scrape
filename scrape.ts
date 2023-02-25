@@ -26,13 +26,13 @@ const login = async (page: Page) => {
     console.log("logging in");
     const handle = logInButtons[0];
     console.log("found handle", handle);
-    await Promise.all([
+    return Promise.all([
       handle.click().then(() => {
-        console.log("network idle");
+        console.log("clicked login button");
       }),
       // wait for network idle isn't great. We don't know what's going on in the background
       page
-        .waitForNavigation({ waitUntil: "networkidle2", ...DEFAULT_TIMEOUT })
+        .waitForNavigation({ waitUntil: "networkidle2", timeout: 0 })
         .then((v) => {
           console.log("network idle");
           return v;
@@ -57,7 +57,7 @@ const openSavedView = async (page: Page) => {
       }
     }
 
-    await page.click("#places-list div");
+    return page.click("#places-list div");
   } catch (e) {
     console.error("failed to open view", e);
   }
