@@ -2,12 +2,11 @@
 import puppeteer, { ElementHandle, Page } from "puppeteer";
 import * as dotenv from "dotenv";
 
-const DEFAULT_TIMEOUT = { ...(process.env.RPI === "true" && { timeout: 0 }) };
-
 const setup = () => {
   dotenv.config();
 };
 
+const DEFAULT_TIMEOUT = { ...(process.env.RPI === "true" && { timeout: 0 }) };
 const login = async (page: Page) => {
   // assume the login button is the first button in the login div
   await page.waitForSelector(".must-login button", {
@@ -26,11 +25,14 @@ const login = async (page: Page) => {
   if (logInButtons.length > 0) {
     console.log("logging in");
     const handle = logInButtons[0];
+    console.log("found handle", handle);
     await Promise.all([
-      handle.click(),
+      handle.click().then(() => {
+        console.log("network idle");
+      }),
       // wait for network idle isn't great. We don't know what's going on in the background
       page
-        .waitForNavigation({ waitUntil: "networkidle0", ...DEFAULT_TIMEOUT })
+        .waitForNavigation({ waitUntil: "networkidle2", ...DEFAULT_TIMEOUT })
         .then((v) => {
           console.log("network idle");
           return v;
