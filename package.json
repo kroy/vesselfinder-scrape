@@ -8,7 +8,8 @@
   "private": true,
   "packageManager": "yarn@3.4.1",
   "scripts": {
-    "scrape": "yarn ts-node-esm scrape.ts"
+    "scrape": "yarn ts-node-esm scrape.ts",
+    "cleanup-pull": "git checkout -- . && git pull && yarn"
   },
   "dependencies": {
     "dotenv": "^16.0.3",
