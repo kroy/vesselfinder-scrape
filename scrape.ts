@@ -7,6 +7,23 @@ const setup = () => {
 };
 
 const DEFAULT_TIMEOUT = { timeout: 0 };
+
+const selectSatelliteView = async (page: Page) => {
+  const mapTypeButton = await page.waitForSelector(
+    "div#map-buttons button#map-type-button",
+    DEFAULT_TIMEOUT
+  );
+  await mapTypeButton?.click();
+  await new Promise<void>((res) => setTimeout(() => res(), 1000));
+  // await page.click("button#map-type-button");
+  await page.waitForSelector("div.hasMenu ul", DEFAULT_TIMEOUT);
+  const satelliteMapButton = await page.$x(
+    `//li[contains(text(), 'Satellite map')]`
+  );
+
+  return Promise.all([satelliteMapButton[0].click()]);
+};
+
 const login = async (page: Page) => {
   // assume the login button is the first button in the login div
   await page.waitForSelector(".must-login button", {
@@ -89,72 +106,104 @@ const selectFilters = async (page: Page) => {
 const hideUnwantedEls = async (
   page: Page,
   unwantedSelectors: string[]
-): Promise<void> => {
+): Promise<any> => {
   const elsToHide: (ElementHandle<any> | null)[] = [];
-  for (const sel of unwantedSelectors) {
-    elsToHide.push(
-      await page.waitForSelector(sel, {
-        ...DEFAULT_TIMEOUT,
-      })
-    );
-  }
-  for (const el of elsToHide) {
-    if (el) await el.evaluate((node) => node.remove());
-  }
+  const promises = unwantedSelectors.map(async (selector) => {
+    return page.waitForSelector(selector, {
+      ...DEFAULT_TIMEOUT,
+    });
+  });
+  // for (const sel of unwantedSelectors) {
+  //   elsToHide.push(
+  //     await page.waitForSelector(sel, {
+  //       ...DEFAULT_TIMEOUT,
+  //     })
+  //   );
+  // }
+
+  const elements = await Promise.all(promises);
+  const hide = elements.map(async (el) => {
+    return el?.evaluate((node) => node.remove());
+  });
+  // for (const el of elsToHide) {
+  //   if (el) await el.evaluate((node) => node.remove());
+  // }
+  return Promise.all(hide);
+};
+
+const main = async () => {
+  const browser = await puppeteer.launch({
+    ...(process.env.RPI === "true" && { executablePath: "chromium-browser" }),
+    headless: false,
+    args: ["--start-fullscreen", "--no-default-browser-check"],
+    ignoreDefaultArgs: ["--enable-automation"],
+  });
+  const page = await browser.newPage();
+
+  // page.on("request", (request) => {
+  //   console.log(request.url());
+  // });
+
+  // Set screen size
+  // figure out/parameterize dimensions for the rpi
+  console.log("setting viewPort");
+  const width = Number(process.env.SCREEN_WIDTH ?? 1920);
+  const height = Number(process.env.SCREEN_HEIGHT ?? 1080);
+  await page.setViewport({
+    width,
+    height,
+    isLandscape: true,
+    deviceScaleFactor: 2,
+  });
+  console.log("navigating to page");
+  // we don't really want to wait for ads etc to be loaded
+  await page.goto("https://www.vesselfinder.com", DEFAULT_TIMEOUT);
+
+  console.log("selecting filters");
+  await selectFilters(page);
+  await selectSatelliteView(page);
+  await Promise.all([openSavedView(page)]);
+  await hideUnwantedEls(page, [
+    "#last-searches",
+    "#map-buttons",
+    ".ol-zoom",
+    ".ol-attribution",
+  ]);
+  const map = await page.waitForSelector("#map", {
+    ...DEFAULT_TIMEOUT,
+  });
+
+  // wait 2 seconds for the cruft to go awat
+  await new Promise<void>((res) => setTimeout(() => res(), 2000));
+  // if (map) {
+  //   // await map.evaluate((node) => node.requestFullscreen());
+  // }
+
+  // const refreshBtn = await page.waitForSelector("#refresh-btn", {
+  //   ...DEFAULT_TIMEOUT,
+  // });
+  await map?.screenshot({
+    path: `images/03-02-2023-0740/map-${Date.now()}.png`,
+  });
+  return browser.close();
+
+  // while (true) {
+  //   console.log("waiting to refresh...");
+  //   await new Promise<void>((res) => setTimeout(() => res(), 600000));
+  //   if (refreshBtn) {
+  //     console.log("refreshing...");
+  //     await refreshBtn.click();
+  //   }
+  // }
+
+  // await page.screenshot({ path: "full.png", fullPage: true });
 };
 
 setup();
-
-const browser = await puppeteer.launch({
-  ...(process.env.RPI === "true" && { executablePath: "chromium-browser" }),
-  headless: false,
-  args: ["--start-fullscreen", "--no-default-browser-check"],
-  ignoreDefaultArgs: ["--enable-automation"],
-});
-const page = await browser.newPage();
-
-// page.on("request", (request) => {
-//   console.log(request.url());
-// });
-
-// Set screen size
-// figure out/parameterize dimensions for the rpi
-console.log("setting viewPort");
-const width = Number(process.env.SCREEN_WIDTH ?? 1920);
-const height = Number(process.env.SCREEN_HEIGHT ?? 1080);
-await page.setViewport({
-  width,
-  height,
-  isLandscape: true,
-  deviceScaleFactor: 2,
-});
-console.log("navigating to page");
-// we don't really want to wait for ads etc to be loaded
-await page.goto("https://www.vesselfinder.com", DEFAULT_TIMEOUT);
-
-console.log("selecting filters");
-await selectFilters(page);
-await openSavedView(page);
-// await hideUnwantedEls(page, ["#last-searches"]);
-const map = await page.waitForSelector("#map", {
-  ...DEFAULT_TIMEOUT,
-});
-if (map) {
-  await map.evaluate((node) => node.requestFullscreen());
-}
-
-const refreshBtn = await page.waitForSelector("#refresh-btn", {
-  ...DEFAULT_TIMEOUT,
-});
+await main();
 
 while (true) {
-  console.log("waiting to refresh...");
-  await new Promise<void>((res) => setTimeout(() => res(), 60000));
-  if (refreshBtn) {
-    console.log("refreshing...");
-    await refreshBtn.click();
-  }
+  console.log("waiting to take picture...");
+  await new Promise<void>((res) => setTimeout(() => res(), 300000));
+  await main();
 }
-
-// await map.screenshot({ path: "map.png", fullPage: false });
-// await page.screenshot({ path: "full.png", fullPage: true });
